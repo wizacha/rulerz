@@ -99,7 +99,7 @@ abstract class GenericElasticsearchVisitor extends GenericVisitor
             ]");
         });
         $this->setInlineOperator('has', function ($a, $b) use ($must) {
-            $value = is_array($b) ? $b : "'[$b]'";
+            $value = is_array($b) ? '[' . implode(', ', $b) . ']' : $b;
 
             return $must("[
                 'terms' => [
