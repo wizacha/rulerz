@@ -6,6 +6,7 @@ use RulerZ\Compiler\Compiler;
 use RulerZ\Compiler\Target\CompilationTarget;
 use RulerZ\Context\ExecutionContext;
 use RulerZ\Exception\TargetUnsupportedException;
+use RulerZ\Filter\FilterResult;
 use RulerZ\Spec\Specification;
 
 class RulerZ
@@ -49,7 +50,7 @@ class RulerZ
      * @param array  $parameters       The parameters used in the rule.
      * @param array  $executionContext The execution context.
      *
-     * @return mixed The filtered target.
+     * @return FilterResult
      */
     public function filter($target, $rule, array $parameters = [], array $executionContext = [])
     {

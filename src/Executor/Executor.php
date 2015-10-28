@@ -3,6 +3,7 @@
 namespace RulerZ\Executor;
 
 use RulerZ\Context\ExecutionContext;
+use RulerZ\Filter\FilterResult;
 
 /**
  * An executor executes a rule against a target.
@@ -17,7 +18,7 @@ interface Executor
      * @param array<Xcallable> $operators  The available operators.
      * @param ExecutionContext $context    The execution context.
      *
-     * @return mixed The filtered target.
+     * @return FilterResult
      */
     public function filter($target, array $parameters, array $operators, ExecutionContext $context);
 

@@ -3,6 +3,7 @@
 namespace RulerZ\Executor\Elasticsearch;
 
 use RulerZ\Context\ExecutionContext;
+use RulerZ\Filter\FilterResult;
 
 trait ElasticsearchFilterTrait
 {
@@ -17,10 +18,22 @@ trait ElasticsearchFilterTrait
         $searchQuery = $this->execute($target, $operators, $parameters);
 
         /** @var \Elasticsearch\Client $target */
-        return $target->search([
+        $response = $target->search([
             'index' => $context['index'],
             'type'  => $context['type'],
             'body'  => ['query' => $searchQuery],
         ]);
+
+        if (!isset($response['hits'])) {
+            return new FilterResult(0, function () {});
+        }
+
+        $count = $response['hits']['total'];
+
+        return new FilterResult($count, function () use ($response) {
+            foreach ($response['hits']['hits'] as $hit) {
+                yield $hit['_source'];
+            }
+        });
     }
 }

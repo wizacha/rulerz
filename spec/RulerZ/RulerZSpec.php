@@ -2,12 +2,19 @@
 
 namespace spec\RulerZ;
 
+use Elasticsearch\Client;
+use PhpSpec\Exception\Example\FailureException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 use RulerZ\Compiler\Compiler;
+use RulerZ\Compiler\EvalCompiler;
+use RulerZ\Compiler\FileCompiler;
 use RulerZ\Compiler\Target\CompilationTarget;
+use RulerZ\Compiler\Target\Elasticsearch\ElasticsearchVisitor;
 use RulerZ\Executor\Executor;
+use RulerZ\Filter\FilterResult;
+use RulerZ\Parser\HoaParser;
 use RulerZ\Spec\Specification;
 
 class RulerZSpec extends ObjectBehavior
@@ -128,5 +135,93 @@ class RulerZSpec extends ObjectBehavior
         $this
             ->shouldThrow('RulerZ\Exception\TargetUnsupportedException')
             ->duringFilter(['some target'], 'points > 30');
+    }
+
+    function it_can_filter_using_elasticsearch()
+    {
+        $this->beConstructedWith(new EvalCompiler(new HoaParser), [new ElasticsearchVisitor]);
+
+        $index = 'foo';
+        $type = 'bar';
+
+        $elasticsearch = new Client();
+        // Clear existing records
+        $elasticsearch->indices()->deleteMapping([
+            'index' => $index,
+            'type' => $type,
+        ]);
+        // Add some test records
+        $elasticsearch->index([
+            'index' => $index,
+            'type' => $type,
+            'id' => '123',
+            'body' => [
+                'price' => 123,
+                'categoryId' => 1,
+            ],
+        ]);
+        $elasticsearch->index([
+            'index' => $index,
+            'type' => $type,
+            'id' => '456',
+            'body' => [
+                'price' => 456,
+                'categoryId' => 2,
+            ],
+        ]);
+        $elasticsearch->index([
+            'index' => $index,
+            'type' => $type,
+            'id' => '789',
+            'body' => [
+                'price' => 789,
+                'categoryId' => 3,
+            ],
+        ]);
+        // Avoid race conditions (Elasticsearch is not synchronous)
+        $elasticsearch->indices()->refresh();
+
+        $rule = 'price < :maxPrice and categoryId in :categoryIds';
+        $parameters = [
+            'maxPrice' => 600,
+            'categoryIds' => [2, 4, 7],
+        ];
+        $context = [
+            'index' => $index,
+            'type' => $type,
+        ];
+
+        $this->filter($elasticsearch, $rule, $parameters, $context)->shouldHaveResults([
+            [
+                'price' => 456,
+                'categoryId' => 2,
+            ]
+        ]);
+    }
+
+    public function getMatchers()
+    {
+        return [
+            'haveResults' => function ($subject, $expectedResults) {
+                if (!$subject instanceof FilterResult) {
+                    throw new FailureException('The method did not return a FilterResult object');
+                }
+                if ($subject->getCount() !== count($expectedResults)) {
+                    throw new FailureException(sprintf(
+                        'Expected %d result, got %d',
+                        count($expectedResults),
+                        $subject->getCount()
+                    ));
+                }
+                $i = 0;
+                foreach ($subject->getGenerator() as $result) {
+                    $expectedResult = $expectedResults[$i];
+                    if ($result !== $expectedResult) {
+                        throw new FailureException('Wrong result');
+                    }
+                }
+                return true;
+            }
+        ];
     }
 }
