@@ -21,13 +21,13 @@ trait ElasticsearchVisitorExamples
     function it_can_compile_a_simple_rule()
     {
         $rule = 'points > 30';
-        $expectedQuery = [
-            'bool' => [
-                'must' => [
-                    'range' => ['points' => ['gt' => 30]],
+        $expectedQuery = "[
+                'bool' => ['must' => [
+                'range' => [
+                    'points' => ['gt' => 30],
                 ]
-            ]
-        ];
+            ]]
+            ]";
 
         /** @var Executor $executorModel */
         $executorModel = $this->compile($this->parseRule($rule));
@@ -37,13 +37,13 @@ trait ElasticsearchVisitorExamples
     function it_handles_nested_accesses()
     {
         $rule = 'user.stats.points > 30';
-        $expectedQuery = [
-            'bool' => [
-                'must' => [
-                    'range' => ['user.stats.points' => ['gt' => 30]],
+        $expectedQuery = "[
+                'bool' => ['must' => [
+                'range' => [
+                    'user.stats.points' => ['gt' => 30],
                 ]
-            ]
-        ];
+            ]]
+            ]";
 
         /** @var Executor $executorModel */
         $executorModel = $this->compile($this->parseRule($rule));
