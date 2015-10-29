@@ -6,11 +6,13 @@ use Elasticsearch\Client;
 use PhpSpec\ObjectBehavior;
 
 use RulerZ\Context\ExecutionContext;
-use RulerZ\Filter\FilterResult;
 use RulerZ\Stub\Executor\ElasticsearchExecutorStub;
+use spec\RulerZ\FilterResultMatcher;
 
 class FilterTraitSpec extends ObjectBehavior
 {
+    use FilterResultMatcher;
+
     function let()
     {
         $this->beAnInstanceOf('RulerZ\Stub\Executor\ElasticsearchExecutorStub');
@@ -39,7 +41,7 @@ class FilterTraitSpec extends ObjectBehavior
         $this->filter($target, $parameters = [], $operators = [], new ExecutionContext([
             'index' => 'es_index',
             'type'  => 'es_type',
-        ]))->shouldReturnAnInstanceOf(FilterResult::class);
+        ]))->shouldHaveResults([]);
     }
 
     function it_throws_an_exception_when_the_execution_context_is_incomplete(Client $target)

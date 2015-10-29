@@ -4,11 +4,13 @@ namespace spec\RulerZ\Executor\PHP;
 
 use PhpSpec\ObjectBehavior;
 use RulerZ\Context\ExecutionContext;
-use RulerZ\Filter\FilterResult;
 use RulerZ\Stub\Executor\ArrayExecutorStub;
+use spec\RulerZ\FilterResultMatcher;
 
 class FilterTraitSpec extends ObjectBehavior
 {
+    use FilterResultMatcher;
+
     function let()
     {
         $this->beAnInstanceOf('RulerZ\Stub\Executor\ArrayExecutorStub');
@@ -21,6 +23,6 @@ class FilterTraitSpec extends ObjectBehavior
         ArrayExecutorStub::$executeReturn = true;
 
         $this->filter($target, $parameters = [], $operators = [], new ExecutionContext())
-            ->shouldReturnAnInstanceOf(FilterResult::class);
+            ->shouldHaveResults($target);
     }
 }

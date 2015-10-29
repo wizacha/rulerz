@@ -3,23 +3,22 @@
 namespace spec\RulerZ;
 
 use Elasticsearch\Client;
-use PhpSpec\Exception\Example\FailureException;
 use PhpSpec\ObjectBehavior;
 use Prophecy\Argument;
 
 use RulerZ\Compiler\Compiler;
 use RulerZ\Compiler\EvalCompiler;
-use RulerZ\Compiler\FileCompiler;
 use RulerZ\Compiler\Target\ArrayVisitor;
 use RulerZ\Compiler\Target\CompilationTarget;
 use RulerZ\Compiler\Target\Elasticsearch\ElasticsearchVisitor;
 use RulerZ\Executor\Executor;
-use RulerZ\Filter\FilterResult;
 use RulerZ\Parser\HoaParser;
 use RulerZ\Spec\Specification;
 
 class RulerZSpec extends ObjectBehavior
 {
+    use FilterResultMatcher;
+
     function let(Compiler $compiler, CompilationTarget $compilationTarget)
     {
         $this->beConstructedWith($compiler, [$compilationTarget]);
@@ -231,35 +230,5 @@ class RulerZSpec extends ObjectBehavior
                 'categoryId' => 2,
             ]
         ]);
-    }
-
-    public function getMatchers()
-    {
-        return [
-            'haveResults' => function ($subject, $expectedResults) {
-                if (!$subject instanceof FilterResult) {
-                    throw new FailureException('The method did not return a FilterResult object');
-                }
-                if ($subject->getCount() !== count($expectedResults)) {
-                    throw new FailureException(sprintf(
-                        'Expected %d result, got %d',
-                        count($expectedResults),
-                        $subject->getCount()
-                    ));
-                }
-                $i = 0;
-                $results = $subject->getResults();
-                if (!$results instanceof \Generator) {
-                    throw new FailureException('The getGenerator() did not return a generator');
-                }
-                foreach ($results as $result) {
-                    $expectedResult = $expectedResults[$i];
-                    if ($result !== $expectedResult) {
-                        throw new FailureException('Wrong result');
-                    }
-                }
-                return true;
-            }
-        ];
     }
 }
