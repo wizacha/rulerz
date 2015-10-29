@@ -4,6 +4,7 @@ namespace spec\RulerZ\Executor\PHP;
 
 use PhpSpec\ObjectBehavior;
 use RulerZ\Context\ExecutionContext;
+use RulerZ\Filter\FilterResult;
 use RulerZ\Stub\Executor\ArrayExecutorStub;
 
 class FilterTraitSpec extends ObjectBehavior
@@ -16,10 +17,10 @@ class FilterTraitSpec extends ObjectBehavior
     function it_filters_the_target_using_execute()
     {
         $target = [ ['some' => 'item'], ['another' => 'item'] ];
-        $results = $target;
 
         ArrayExecutorStub::$executeReturn = true;
 
-        $this->filter($target, $parameters = [], $operators = [], new ExecutionContext())->shouldReturn($results);
+        $this->filter($target, $parameters = [], $operators = [], new ExecutionContext())
+            ->shouldReturnAnInstanceOf(FilterResult::class);
     }
 }

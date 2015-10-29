@@ -10,6 +10,7 @@ use Prophecy\Argument;
 use RulerZ\Compiler\Compiler;
 use RulerZ\Compiler\EvalCompiler;
 use RulerZ\Compiler\FileCompiler;
+use RulerZ\Compiler\Target\ArrayVisitor;
 use RulerZ\Compiler\Target\CompilationTarget;
 use RulerZ\Compiler\Target\Elasticsearch\ElasticsearchVisitor;
 use RulerZ\Executor\Executor;
@@ -135,6 +136,39 @@ class RulerZSpec extends ObjectBehavior
         $this
             ->shouldThrow('RulerZ\Exception\TargetUnsupportedException')
             ->duringFilter(['some target'], 'points > 30');
+    }
+
+    function it_can_filter_an_array()
+    {
+        $this->beConstructedWith(new EvalCompiler(new HoaParser), [new ArrayVisitor]);
+
+        $data = [
+            [
+                'price' => 123,
+                'categoryId' => 1,
+            ],
+            [
+                'price' => 456,
+                'categoryId' => 2,
+            ],
+            [
+                'price' => 789,
+                'categoryId' => 3,
+            ],
+        ];
+
+        $rule = 'price < :maxPrice and categoryId in :categoryIds';
+        $parameters = [
+            'maxPrice' => 600,
+            'categoryIds' => [2, 4, 7],
+        ];
+
+        $this->filter($data, $rule, $parameters)->shouldHaveResults([
+            [
+                'price' => 456,
+                'categoryId' => 2,
+            ]
+        ]);
     }
 
     function it_can_filter_using_elasticsearch()

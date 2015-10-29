@@ -4,6 +4,7 @@ namespace RulerZ\Executor\ArrayTarget;
 
 use RulerZ\Context\ExecutionContext;
 use RulerZ\Context\ObjectContext;
+use RulerZ\Filter\FilterResult;
 
 trait FilterTrait
 {
@@ -24,6 +25,10 @@ trait FilterTrait
             }
         }
 
-        return $matches;
+        return new FilterResult(count($matches), function () use ($matches) {
+            foreach ($matches as $match) {
+                yield $match;
+            }
+        });
     }
 }
