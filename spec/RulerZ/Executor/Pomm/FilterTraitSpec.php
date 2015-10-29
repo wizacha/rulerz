@@ -5,6 +5,7 @@ namespace spec\RulerZ\Executor\Pomm;
 use PhpSpec\ObjectBehavior;
 use PommProject\Foundation\Where;
 use RulerZ\Context\ExecutionContext;
+use RulerZ\Filter\FilterResult;
 use RulerZ\Stub\Executor\PommExecutorStub;
 use RulerZ\Stub\ModelStub;
 
@@ -22,7 +23,8 @@ class FilterTraitSpec extends ObjectBehavior
         PommExecutorStub::$executeReturn = $whereClause;
         $modelStub->findWhere($whereClause)->willReturn($results);
 
-        $this->filter($modelStub, $parameters = [], $operators = [], new ExecutionContext())->shouldReturn($results);
+        $this->filter($modelStub, $parameters = [], $operators = [], new ExecutionContext())
+            ->shouldReturnAnInstanceOf(FilterResult::class);
     }
 
     function it_call_acustom_method_if_specified_in_the_context(ModelStub $modelStub, Where $whereClause)
@@ -34,6 +36,6 @@ class FilterTraitSpec extends ObjectBehavior
 
         $this->filter($modelStub, $parameters = [], $operators = [], new ExecutionContext([
             'method' => 'findCustom'
-        ]))->shouldReturn($results);
+        ]))->shouldReturnAnInstanceOf(FilterResult::class);
     }
 }
