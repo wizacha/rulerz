@@ -34,9 +34,19 @@ class FilterResult
     }
 
     /**
+     * Returns the results as a generator so that they can be iterated without having
+     * to load them all in memory at once.
+     *
+     * Example:
+     *
+     *     $results = $rulerz->filter(...);
+     *     foreach ($results->getResults() as $result) {
+     *         ...
+     *     }
+     *
      * @return \Generator
      */
-    public function getGenerator()
+    public function getResults()
     {
         $callable = $this->generatorProvider;
 

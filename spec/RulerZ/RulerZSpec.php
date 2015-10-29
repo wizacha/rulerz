@@ -248,7 +248,11 @@ class RulerZSpec extends ObjectBehavior
                     ));
                 }
                 $i = 0;
-                foreach ($subject->getGenerator() as $result) {
+                $results = $subject->getResults();
+                if (!$results instanceof \Generator) {
+                    throw new FailureException('The getGenerator() did not return a generator');
+                }
+                foreach ($results as $result) {
                     $expectedResult = $expectedResults[$i];
                     if ($result !== $expectedResult) {
                         throw new FailureException('Wrong result');
