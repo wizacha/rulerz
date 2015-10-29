@@ -3,6 +3,7 @@
 namespace RulerZ\Executor\DoctrineQueryBuilder;
 
 use RulerZ\Context\ExecutionContext;
+use RulerZ\Filter\FilterResult;
 
 trait FilterTrait
 {
@@ -29,7 +30,13 @@ trait FilterTrait
             $target->setParameter($name, $value);
         }
 
-        // and we return the final results
-        return $target->getQuery()->getResult();
+        // possible improvement: paginate the query to avoid fetching all results at once in memory
+        $results = $target->getQuery()->getResult();
+
+        return new FilterResult(count($results), function () use ($results) {
+            foreach ($results as $result) {
+                yield $result;
+            }
+        });
     }
 }

@@ -7,6 +7,7 @@ use Doctrine\ORM\QueryBuilder;
 use PhpSpec\ObjectBehavior;
 
 use RulerZ\Context\ExecutionContext;
+use RulerZ\Filter\FilterResult;
 use RulerZ\Stub\Executor\DoctrineExecutorStub;
 
 class FilterTraitSpec extends ObjectBehavior
@@ -31,6 +32,7 @@ class FilterTraitSpec extends ObjectBehavior
         $target->setParameter('foo', 'bar')->shouldBeCalled();
         $target->andWhere($modifiedDql)->shouldBeCalled();
 
-        $this->filter($target, $parameters = ['foo' => 'bar'], $operators = [], new ExecutionContext())->shouldReturn($results);
+        $this->filter($target, $parameters = ['foo' => 'bar'], $operators = [], new ExecutionContext())
+            ->shouldReturnAnInstanceOf(FilterResult::class);
     }
 }
